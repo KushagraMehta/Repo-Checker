@@ -1,6 +1,5 @@
 
-
-
+{% load static %}
 
 /*//////////////////////////////////////////////////////////////////
 [ FONT ]*/
@@ -17,6 +16,17 @@
 
 
 
+/*//////////////////////////////////////////////////////////////////
+[ ERROR ]*/
+ul.errorlist{
+  list-style-image: url("{% static 'images/icons/alert.png' %}");
+  font-family: OpenSans-Regular;
+	font-size: 20px;
+  padding: 10px;
+  background: #f44336;/* Red */
+  color: white;
+  margin-bottom: 5px;
+}
 
 /*//////////////////////////////////////////////////////////////////
 [ RESTYLE TAG ]*/
@@ -160,24 +170,45 @@ iframe {
   	margin-right: auto;		
 }
 .container-login100 {
-  width: 100%;  
-  min-height: 100vh;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  padding: 15px;
 
-  background:  #5a5757 ;
-  background: -webkit-linear-gradient(left, #000000 ,  #7e7e7e );
-  background: -o-linear-gradient(left,  #000000 ,  #7e7e7e );
-  background: -moz-linear-gradient(left,  #000000 ,  #7e7e7e );
-  background: linear-gradient(left,  #000000 ,  #7e7e7e );
+			width: 100%;
+			min-height: 100vh;
+			display: -webkit-box;
+			display: -webkit-flex;
+			display: -moz-box;
+			display: -ms-flexbox;
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+			align-items: center;
+			padding: 15px;
+			position: relative;
+			
+			background: #5a5757;
+			background: -webkit-linear-gradient(left, #000000, #7e7e7e);
+			background: -o-linear-gradient(left, #000000, #7e7e7e);
+			background: -moz-linear-gradient(left, #000000, #7e7e7e);
+			background: linear-gradient(left, #000000, #7e7e7e);
+			z-index: 1;
+}
 
+.container-login100::before{
+  position: absolute;
+  content: "";
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: -webkit-linear-gradient(right, #000000, #7e7e7e);
+  background: -o-linear-gradient(right, #000000, #7e7e7e);
+  background: -moz-linear-gradient(right, #000000, #7e7e7e);
+  background: linear-gradient(right, #000000, #7e7e7e);
+  z-index: -1;
+  transition: opacity 1.5s linear;
+  opacity: 0;
+}
+.container-login100:hover::before{
+	opacity: 1;
 }
 
 .wrap-login100 {

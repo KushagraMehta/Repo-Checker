@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
+
 # Create your views here.
 from django.http import HttpResponse
 from .form import user_name
@@ -17,4 +18,12 @@ class home_page(TemplateView):
 
         if user_name_data.is_valid():
             print(user_name_data.cleaned_data['user'])
-        return render(request, self.template_name)
+            # return HttpResponseRedirect('')
+        else:
+            print("______________Error______________________")
+            print(user_name_data.errors)
+            Error = user_name_data.errors
+            user_name_form = user_name()
+            return render(request, self.template_name, {'form': user_name_form,
+                                                        'error': Error
+                                                        })

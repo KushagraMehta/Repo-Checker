@@ -1,11 +1,7 @@
 from django import forms
 from django.core import validators
+from django.forms import ValidationError
 import requests
-
-
-def find_user(username):
-    r = requests.get('https://api.github.com/users/'+username+'/repos')
-    return False if r.status_code == 404 else True
 
 
 class user_name(forms.Form):
@@ -16,8 +12,10 @@ class user_name(forms.Form):
 
     def clean_user(self):
         username = self.cleaned_data.get('user')
+        # r = requests.get('https://api.github.com/users/' + username + '/repos')
 
-        if not find_user(username):
-            raise forms.ValidationError("Enter correct UserName")
-
+        # return False if r.status_code == 404 else True
+        raise ValidationError(
+            "Enter correct UserName",
+            code='invalid')
         return username
