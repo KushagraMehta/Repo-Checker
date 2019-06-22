@@ -352,10 +352,10 @@ input.input100 {
   opacity: 0;
 
   background:  #7e7e7e ;
-  background: -webkit-linear-gradient(right, #6a11cb,  #7e7e7e );
-  background: -o-linear-gradient(right, #6a11cb,  #7e7e7e );
-  background: -moz-linear-gradient(right, #6a11cb,  #7e7e7e );
-  background: linear-gradient(right, #6a11cb,  #7e7e7e );
+  background: -webkit-linear-gradient(right, #000000,  #7e7e7e );
+  background: -o-linear-gradient(right, #000000,  #7e7e7e );
+  background: -moz-linear-gradient(right, #000000,  #7e7e7e );
+  background: linear-gradient(right, #000000,  #7e7e7e );
 
   -webkit-transition: all 0.4s;
   -o-transition: all 0.4s;
