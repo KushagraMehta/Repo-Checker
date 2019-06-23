@@ -12,10 +12,10 @@ class user_name(forms.Form):
 
     def clean_user(self):
         username = self.cleaned_data.get('user')
-        # r = requests.get('https://api.github.com/users/' + username + '/repos')
+        r = requests.get('https://api.github.com/users/' + username + '/repos')
 
-        # return False if r.status_code == 404 else True
-        raise ValidationError(
-            "Enter correct UserName",
-            code='invalid')
+        if r.status_code == 404:
+            raise ValidationError(
+                "Enter correct UserName",
+                code='invalid')
         return username
