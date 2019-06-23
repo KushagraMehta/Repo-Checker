@@ -39,10 +39,13 @@
 					<span class="login100-form-title p-b-43">
 						repo checker
 					</span>
-					{{ error }}
 					<div class="wrap-input100 rs2 validate-input" data-validate = "Username is required">
 						{{ form }}
+					{% if form.errors %}
+						<span class="label-input_error">!! Enter Correct Username !!</span>
+					{% else %}
 						<span class="label-input100">Username</span>
+					{% endif %}
 						{% csrf_token %}
 					</div>
 					<div class="container-login100-form-btn">

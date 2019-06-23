@@ -1,6 +1,4 @@
 
-{% load static %}
-
 /*//////////////////////////////////////////////////////////////////
 [ FONT ]*/
 
@@ -14,20 +12,12 @@
   src: url('../fonts/OpenSans/OpenSans-Bold.ttf'); 
 }
 
-
-
 /*//////////////////////////////////////////////////////////////////
-[ ERROR ]*/
-ul.errorlist{
-  list-style-image: url("{% static 'images/icons/alert.png' %}");
-  font-family: OpenSans-Regular;
-	font-size: 20px;
-  padding: 10px;
-  background: #f44336;/* Red */
-  color: white;
-  margin-bottom: 5px;
+[ ERROR TAG ]*/
+.errorlist{
+  list-style: none;    
+  display: none;
 }
-
 /*//////////////////////////////////////////////////////////////////
 [ RESTYLE TAG ]*/
 
@@ -287,6 +277,25 @@ iframe {
   transition: all 0.4s;
 }
 
+.label-input_error {
+  font-family: OpenSans-Bold;
+  font-size: 15px;
+  color: #FF0000;
+  line-height: 1.2;
+
+  display: block;
+  position: absolute;
+  pointer-events: none;
+  width: 100%;
+  padding-left: 30px;
+  left: 0;
+  top: 28px;
+
+  -webkit-transition: all 0.4s;
+  -o-transition: all 0.4s;
+  -moz-transition: all 0.4s;
+  transition: all 0.4s;
+}
 .input100 {
   font-family: OpenSans-Bold;
   font-size: 15px;
@@ -329,6 +338,16 @@ input.input100 {
 }
 
 
+.input100:focus + .label-input_error {
+  top: 10px;
+  font-size: 13px;
+  color: #FF0000;
+}
+.has-val + .label-input_error {
+  top: 10px;
+  font-size: 13px;
+  color: #FF0000;
+}
 
 /*------------------------------------------------------------------
 [ Button ]*/
