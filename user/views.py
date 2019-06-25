@@ -2,7 +2,10 @@ from django.shortcuts import render
 from django.views.generic import TemplateView
 
 # Create your views here.
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, JsonResponse
+from django.contrib.auth.models import User
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from .form import user_name
 import requests
 import json
@@ -28,9 +31,21 @@ class home_page(TemplateView):
             return render(request, self.template_name, {'form': user_name_data})
 
 
+def test(request):
+    return render(request, "USER_PAGE/TEST.HTML")
+
+
 class repo_explorer(TemplateView):
 
     template_name = "USER_PAGE/index.html"
+
+    def get(self, request, username=None):
+        return render(request, self.template_name, {"username": username})
+
+
+class user_data(APIView):
+    authentication_classes = []
+    permission_classes = []
     commit_data = []
     count_data = []
 
@@ -81,4 +96,4 @@ class repo_explorer(TemplateView):
         print(self.commit_data)
         graph = {'username': self.username, 'repo_data': json.dumps(
             repos), "commit_data": json.dumps(self.commit_data), "count_data": json.dumps(self.count_data)}
-        return render(request, self.template_name, graph)
+        return Response(graph)
