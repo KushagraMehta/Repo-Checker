@@ -1,20 +1,30 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Untitled Document</title>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+<body>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<canvas id="test" width="500" height="200" aria-label="Hello ARIA World"></canvas>
+	
 <script>
-var endpoint = '/api/{{username}}';
-
-$.ajax({
-	method: "GET",
-	url: endpoint,
-	success: function(data){
-		sessionStorage.setItem("username", data['username']);
-		sessionStorage.setItem("repo_data", data['repo_data']);	
-		sessionStorage.setItem("commit_data", data['commit_data']);
-		sessionStorage.setItem("count_data", data['count_data']);
-		console.log(data)
-	},
-	error: function(error_data){
-		console.log(error_data)
-	}
-});
+	var username = "{{username|safe}}";
+	var repo_data = {{repo_data|safe}};
+	var commit_data = {{commit_data|safe}};
+	var count_data = {{count_data|safe}};
+	console.log(commit_data);
+	commit_data.forEach((data_1,index_1) =>{
+				data_1.forEach((data,index) =>{
+					commit_data[index_1][index] = data.slice(0,10);
+				});
+			});
+	
 </script>
+
+</body>
+
+</html>

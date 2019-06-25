@@ -4,8 +4,6 @@ from django.views.generic import TemplateView
 # Create your views here.
 from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth.models import User
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from .form import user_name
 import requests
 import json
@@ -38,14 +36,7 @@ def test(request):
 class repo_explorer(TemplateView):
 
     template_name = "USER_PAGE/index.html"
-
-    def get(self, request, username=None):
-        return render(request, self.template_name, {"username": username})
-
-
-class user_data(APIView):
-    authentication_classes = []
-    permission_classes = []
+    headers = {'Authorization': 'token 72aa408a992ea190d32275a2001cdf95ba5ad290'}
     commit_data = []
     count_data = []
 
@@ -54,7 +45,7 @@ class user_data(APIView):
         count = []
         counter = 0
         r = requests.get('https://api.github.com/repos/' +
-                         self.username+'/'+repo+'/commits')
+                         self.username+'/'+repo+'/commits', headers=self.headers)
         commits_json = json.loads(r.text)
 
         if 'message' not in commits_json:
@@ -76,16 +67,16 @@ class user_data(APIView):
     def get(self, request, username=None):
         self.username = username
         r = requests.get('https://api.github.com/users/' +
-                         self.username+'/repos')
+                         self.username+'/repos', headers=self.headers)
         repos_json = json.loads(r.text)
         repos = []
-        # if 'limit exceeded' in repos_json['message']:
-        #     raise Exception("API Limmit Exceeded. Plz wait for 1 Day.. ;-)")
-
-        for i in repos_json:
-            if i['fork'] == False:
-                repos.append(i['name'])
-
+        try:
+            for i in repos_json:
+                if i['fork'] == False:
+                    repos.append(i['name'])
+        except:
+            print("___ERROR_____")
+            render(request, self.template_name, {})
         repo_thead = []
         for repo in repos:
             repo_thead.append(Thread(target=self.commiter, args=(repo,)))
@@ -96,4 +87,5 @@ class user_data(APIView):
         print(self.commit_data)
         graph = {'username': self.username, 'repo_data': json.dumps(
             repos), "commit_data": json.dumps(self.commit_data), "count_data": json.dumps(self.count_data)}
-        return Response(graph)
+        print(graph)
+        return render(request, self.template_name, graph)
