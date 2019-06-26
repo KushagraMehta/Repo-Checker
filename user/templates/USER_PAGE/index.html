@@ -17,12 +17,11 @@
 	var commit_data = {{commit_data|safe}};
 	var count_data = {{count_data|safe}};
 	console.log(commit_data);
-	commit_data.forEach((data_1,index_1) =>{
-				data_1.forEach((data,index) =>{
-					commit_data[index_1][index] = data.slice(0,10);
-				});
-			});
-	
+	for(i=0 ; i< commit_data.length; i++){
+		for(j=0 ; j< commit_data[i].length; j++){
+			commit_data[index_1][index] = commit_data[index_1][index].slice(0,10);
+		}
+	}
 </script>
 
 </body>

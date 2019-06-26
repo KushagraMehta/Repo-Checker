@@ -29,14 +29,10 @@ class home_page(TemplateView):
             return render(request, self.template_name, {'form': user_name_data})
 
 
-def test(request):
-    return render(request, "USER_PAGE/TEST.HTML")
-
-
 class repo_explorer(TemplateView):
 
     template_name = "USER_PAGE/index.html"
-    headers = {'Authorization': 'token 72aa408a992ea190d32275a2001cdf95ba5ad290'}
+    # headers = {'Authorization': 'token 72aa408a992ea190d32275a2001cdf95ba5ad290'}
     commit_data = []
     count_data = []
 
@@ -45,7 +41,7 @@ class repo_explorer(TemplateView):
         count = []
         counter = 0
         r = requests.get('https://api.github.com/repos/' +
-                         self.username+'/'+repo+'/commits', headers=self.headers)
+                         self.username+'/'+repo+'/commits')
         commits_json = json.loads(r.text)
 
         if 'message' not in commits_json:
@@ -67,7 +63,7 @@ class repo_explorer(TemplateView):
     def get(self, request, username=None):
         self.username = username
         r = requests.get('https://api.github.com/users/' +
-                         self.username+'/repos', headers=self.headers)
+                         self.username+'/repos')
         repos_json = json.loads(r.text)
         repos = []
         try:
@@ -75,8 +71,8 @@ class repo_explorer(TemplateView):
                 if i['fork'] == False:
                     repos.append(i['name'])
         except:
-            print("___ERROR_____")
-            render(request, self.template_name, {})
+            print("_____ERROR_____")
+            print(repos_json)
         repo_thead = []
         for repo in repos:
             repo_thead.append(Thread(target=self.commiter, args=(repo,)))
