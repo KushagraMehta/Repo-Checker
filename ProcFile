@@ -1,1 +1,0 @@
-web: gunicorn  repo_checker.wsgi --log-file - 
