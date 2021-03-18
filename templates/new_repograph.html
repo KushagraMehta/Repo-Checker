@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+{% load static  %}
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Repositories</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+	<div class="container-scroller">
+	
+	<div class="navbar-menu-wrapper d-flex align-items-stretch">
+		<button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+			<img src="{% static 'images/dashboard/menu.png' %}">
+		</button>
+	</div>
+
+    <div class="container-fluid page-body-wrapper">
+      <nav  id="sidebar" class="sidebar sidebar-offcanvas">	
+        <ul class="nav">
+          <li class="nav-item nav-profile">
+            <a href="#" class="nav-link">
+              <div class="nav-profile-image">
+				<!-- adding user github image -->
+                <img src="{{ avatar_url }}" alt="profile">
+              </div>
+              <div class="nav-profile-text d-flex flex-column">
+				<!-- user github username -->
+                <span class="font-weight-bold">{{username}}</span>
+              </div>
+            </a>
+            <li><hr></li>
+          </li>
+          <li class="nav-item" style="background: #bfb9b796;">
+            <a class="nav-link" id="dashboard" href="javascript:void(0)" onclick="show_dashboard()">
+              <span class="menu-title">Dashboard</span>
+			  <img src="{% static 'images/dashboard/dashboard.png' %}" class="mdi menu-icon" style="margin-left: auto">
+            </a>
+		  </li>
+		  <!-- generating the list of all the repo on the sidebar -->
+		  <!-- enclosing the <li> tag under for loop creates multiple sections -->
+		    {% if repo_data %}    
+				{% for repo in repo_data %}
+				<li class="nav-item">
+					<a class="nav-link" id="{{ forloop.counter0 }}" href="javascript:void(0)" onclick="simulate(this.id)" >
+						<span class="menu-title">{{ repo }}</span>
+						<!-- <i class="mdi mdi-contacts menu-icon"></i> -->
+						<img src="{% static 'images/dashboard/arrow.png' %}" class="mdi menu-icon" style="margin-left: auto">
+					</a>
+				</li>
+				{% endfor %}
+			{% endif %}
+          <li class="nav-item sidebar-actions">
+			  <hr>
+            <span class="nav-link"> 
+				<!-- link to the fullgraph page -->
+				<a href="{% url 'fullgraph' %}" class="btn btn-block btn-lg btn-gradient-primary mt-4">Detailed Statistics</a>
+            </span>
+          </li>
+        </ul>
+      </nav>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              <span class="page-title-icon bg-gradient-primary text-white mr-2">
+				<img src="{% static 'images/dashboard/home.png' %}" class="mdi" style="padding-top: 10px;">
+			</span>
+			HI {{username}}
+            </h3>
+          </div>
+          <div class="row" style="margin-top: 50px;">
+            <div class="col-md-4  grid-margin">
+              <div class="card bg-gradient-danger card-img-holder text-white">
+                <div class="card-body">
+                  <img src="{% static 'images/dashboard/circle.svg' %}" class="card-img-absolute" alt="circle-image"/>
+                  <h4 class="font-weight-normal mb-3">Total Commits
+                    <img src="{% static 'images/dashboard/timeline.png' %}" class="mdi mdi-24px float-right">
+				  </h4>
+				  <!-- here the total commit is displayed -->
+                  <h2 class="mb-5" id="total_commits"></h2>
+                </div>
+              </div>
+              <div style="padding-top: 50px"></div>
+              <div class="card bg-gradient-info card-img-holder text-white">
+                  <div class="card-body">
+                    <img src="{% static 'images/dashboard/circle.svg' %}" class="card-img-absolute" alt="circle-image"/>                  
+                    <h4 class="font-weight-normal mb-3">Days Commited
+                      <img src="{% static 'images/dashboard/today.png' %}" class="mdi mdi-24px float-right">
+					</h4>
+					<!-- here the commit days is displayed -->
+                    <h2 class="mb-5" id="days_commited"></h2>
+                  </div>
+              </div>
+            </div>
+            <div class="col-md-8 grid-margin stretch-card">
+              <div class="card">
+                <div class="chart-body">
+				  <div id="chartContainer1" style="width: 100%; height: 370px;"></div>
+                </div>
+              </div>
+    	    </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- ================================================================================================ -->
+  <!-- JAVASCRIPTS   STARTS -->
+  <!-- ================================================================================================ -->
+
+  <script src="{% static 'js/vendor.bundle.base.js' %}"></script>
+  <script src="{% static 'js/off-canvas.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/canvasjs.min.js' %}"></script>  
+  
+
+  <!-- ........................................................ -->
+  <!-- generating dashboard result (graph) -->
+  <script>
+		function show_dashboard() {
+
+		var repos = {{repo_data|safe}};
+		var commits = {{commit_data|safe}};     
+		var counts = {{count_data|safe}};
+		
+		sessionStorage.clear();
+		sessionStorage.setItem('username', "{{username}}");
+		sessionStorage.setItem('repo_data', JSON.stringify({{repo_data | safe}}));
+		sessionStorage.setItem('commit_data', JSON.stringify({{commit_data | safe}}));
+		sessionStorage.setItem('count_data', JSON.stringify({{count_data | safe}}));
+
+
+		var totalcommits = 0;
+		var commit_day_count = 0;
+		var dict = [];
+				
+		var newSeries = [];
+		for (let i = 0; i < repos.length; i++) {
+
+			dp = [];
+
+			for(var j = 0; j < commits[i].length; j++) {
+				var commit_date = commits[i][j];
+				var date = commit_date.split("-");
+				var commit_count = counts[i][j];
+
+				if (commit_date in dict) 
+					{dict.push(commit_date);}
+				else 
+					commit_day_count = commit_day_count + 1;
+				
+				dp.push({ x: new Date(date[0], date[1]-1, date[2]), y: commit_count});
+				totalcommits = totalcommits + commit_count;
+			}
+			var seriesData = {
+				name: repos[i], 
+				showInLegend: true,
+				type: "line",
+				xValueFormatString: "DD MMM",
+				dataPoints: dp
+			};
+			newSeries.push(seriesData);
+		}
+
+		var chart = new CanvasJS.Chart("chartContainer1", {
+			animationEnabled: true,
+			animationDuration: 2000,  
+			backgroundColor: "#ffffff",
+			theme: "light1",
+			title:{
+				text: "Commits per repository"
+			},
+			axisX:{
+				valueFormatString: "MMM YY"
+			},
+			axisY:{
+				interlacedColor: "#F0F8FF" ,
+        		gridThickness: 0,
+				includeZero: false
+			},
+			data: newSeries
+			
+		});
+		chart.render();
+
+		document.getElementById("total_commits").innerHTML = totalcommits;
+		document.getElementById("days_commited").innerHTML = commit_day_count;
+
+	}
+	window.onload = show_dashboard;
+	document.getElementById("dashboard").onclick = show_dashboard;
+</script>
+
+
+
+<!-- ........................................................ -->
+<!-- generating graph for each repo on click -->
+<script>
+	function simulate(id) {
+		var i = id;
+
+		var repos = {{repo_data|safe}};
+		var commits = {{commit_data|safe}};     
+		var counts = {{count_data|safe}};
+
+		var totalcommits = 0;
+		var commit_day_count = 0;
+		var dict = [];
+			
+		dp = [];
+		
+		for(var j = 0; j < commits[i].length; j++) {
+			var commit_date = commits[i][j];
+			var date = commit_date.split("-");
+			var commit_count = counts[i][j];
+
+			if (commit_date in dict) 
+				{dict.push(commit_date);}
+			else 
+				{commit_day_count = commit_day_count + 1;}
+
+			dp.push({ x: new Date(date[0], date[1]-1, date[2]), y: commit_count});
+			totalcommits = totalcommits + commit_count;
+		}
+	
+		var chart = new CanvasJS.Chart("chartContainer1", {
+			animationEnabled: true,
+			animationDuration: 2000,  
+			backgroundColor: "#ffffff",
+			theme: "light1",
+			axisX:{
+				valueFormatString: "MMM YY"
+			},
+			axisY:{
+				interlacedColor: "#F0F8FF" ,
+        		gridThickness: 0,
+				includeZero: false
+			},
+			data: [{
+				name: repos[i], 
+				showInLegend: true,
+				type: "column",
+				xValueFormatString: "DD MMM",
+				dataPoints: dp
+			}]
+			
+		});
+		chart.render();
+
+		document.getElementById("total_commits").innerHTML = totalcommits;
+		document.getElementById("days_commited").innerHTML = commit_day_count;
+
+	}
+</script>
+
+<!-- ================================================================================================ -->
+<!-- JAVASCRIPTS   ENDS -->
+<!-- ================================================================================================ -->
+
+</body>
+
+</html>
