@@ -29,7 +29,7 @@ SECRET_KEY = '5p=v1!uxf^7rf0@q%pmkln)ncu=e27dmj$qfj^a7ot5h+i!te9'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['repo-checker-a.herokuapp.com', '127.0.0.1:8000']
 
 
 # Application definition
