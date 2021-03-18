@@ -1,87 +1,126 @@
 from django.shortcuts import render
-from django.views.generic import TemplateView
-
-# Create your views here.
-from django.http import HttpResponseRedirect, JsonResponse
-from django.contrib.auth.models import User
-from .form import user_name
-import requests
+from user.models import UserName
+from user.form import AddUserForm
+import os
 import json
+import requests
 from threading import Thread
+from django.views.generic import TemplateView
+# Create your views here.
 
 
-class home_page(TemplateView):
-    template_name = "WELCOME_PAGE/index.html"
-
+# handle request for the main page
+# when the request is GET
+# takes all the username fron the database model
+# pass the data in form of dict to html page
+# render index.html and pass the dict to it
+class userpage(TemplateView):
     def get(self, request):
-        user_name_form = user_name()
-        return render(request, self.template_name, {'form': user_name_form})
-
-    def post(self, request):
-        user_name_data = user_name(request.POST)
-
-        if user_name_data.is_valid():
-            print(user_name_data.cleaned_data['user'])
-            return HttpResponseRedirect('user/'+str(user_name_data.cleaned_data['user']))
-        else:
-            print("______________Error______________________")
-            print(user_name_data.errors)
-            return render(request, self.template_name, {'form': user_name_data})
+        print(UserName.objects.all())
+        user_list = UserName.objects.all()
+        data_dict = {'user_list': user_list}
+        return render(request, 'index.html', data_dict)
 
 
-class repo_explorer(TemplateView):
-
-    template_name = "USER_PAGE/index.html"
-    # headers = {'Authorization': 'token 72aa408a992ea190d32275a2001cdf95ba5ad290'}
+# handle dashboard page requests
+class new_repopage(TemplateView):
     commit_data = []
     count_data = []
+    repo_data = []
+    os.environ['API_TOKEN'] = '6bcba04a4525f5e2fba6907a9e1b918ef1a8e502'
+    # pass the auth key to perform multiple search from the github-api
+    # write your own auth key for successful request to the server
+    token = os.getenv('API_TOKEN')
+    # headers = {'Authorization': 'token '+token}
+    headers = {}
+
+    # each thread extracts detail about commit for each repo
 
     def commiter(self, repo):
-        commits = []
-        count = []
-        counter = 0
-        r = requests.get('https://api.github.com/repos/' +
-                         self.username+'/'+repo+'/commits')
-        commits_json = json.loads(r.text)
 
+        # clearing previous data
+        self.commit_data = []
+        self.count_data = []
+        self.repo_data = []
+
+        commits = []
+        counts = []
+
+        # request for commit information for the repo
+        r = requests.get('https://api.github.com/repos/' +
+                         self.username+'/'+repo+'/commits', headers=self.headers)
+        commits_json = json.loads(r.text)
+        count = 0
+
+        # check if no commit is done on a repo
+        # if exists the create 2 list  ---- 1. commit dates  ----   2. commit count on those date
+        # simple if else rule to count number of commits for each repo
         if 'message' not in commits_json:
             for i in commits_json:
                 datetime = i['commit']['committer']['date']
-                datetime = " ".join(datetime[:-1].split('T'))
+                date = datetime[:-1].split('T')[0]
                 if not commits:
-                    commits.append(datetime)
-                    counter += 1
-                elif commits[-1] == datetime:
-                    counter += 1
+                    commits.append(date)
+                    count += 1
+                elif commits[-1] == date:
+                    count += 1
                 else:
-                    commits.append(datetime)
-                    count.append(counter)
-                    counter = 0
-            self.commit_data.append(commits)
-            self.count_data.append(count)
+                    commits.append(date)
+                    counts.append(count)
+                    count = 1
+            counts.append(count)
+
+        # saving the commit data for each repo
+        # adding all the data for each repo to form a 2 - list of commit-date and commit-counts
+        self.repo_data.append(repo)
+        self.commit_data.append(commits)
+        self.count_data.append(counts)
+
+    # when the get request occurs
 
     def get(self, request, username=None):
         self.username = username
+        # make request to the api for the repo of following username ; provided with auth-key as header
         r = requests.get('https://api.github.com/users/' +
-                         self.username+'/repos')
-        repos_json = json.loads(r.text)
-        repos = []
-        try:
-            for i in repos_json:
-                if i['fork'] == False:
-                    repos.append(i['name'])
-        except:
-            print("_____ERROR_____")
-            print(repos_json)
-        repo_thead = []
-        for repo in repos:
-            repo_thead.append(Thread(target=self.commiter, args=(repo,)))
-            repo_thead[-1].start()
+                         self.username + '/repos', headers=self.headers)
 
-        for thread in repo_thead:
-            thread.join()
-        print(self.commit_data)
-        graph = {'username': self.username, 'repo_data': json.dumps(
-            repos), "commit_data": json.dumps(self.commit_data), "count_data": json.dumps(self.count_data)}
-        print(graph)
-        return render(request, self.template_name, graph)
+        # if user does not exist (status code is 404)
+        if r.status_code == 404:
+            # render error page from template directory
+            return render(request, 'error-404.html')
+        else:
+            # convert the text to python-json format for easy retrieval
+            repos_json = json.loads(r.text)
+            repos = []
+            print(repos_json)
+            # extracting all the repository-name owned by the user
+            for i, j in enumerate(repos_json):
+                if i == 0:
+                    # user profile pic
+                    avatar_url = j['owner']['avatar_url']
+                if j['fork'] == False:                              # repo is forked or not
+                    repos.append(j['name'])
+
+            # initiating the thread for multiple request to the server
+            repo_thead = []
+            for repo in repos:
+                # commiter function is invoked and a repo is passed as an argument
+                repo_thead.append(Thread(target=self.commiter, args=(repo,)))
+                repo_thead[-1].start()
+
+            # joining all the threads
+            for thread in repo_thead:
+                thread.join()
+
+            # send all the data collected as in form of dictionary to the webpage
+            graph = {'username': self.username, 'avatar_url': avatar_url, 'repo_data': self.repo_data,
+                     "commit_data": json.dumps(self.commit_data), "count_data": json.dumps(self.count_data)}
+            print(graph)
+            return render(request, 'new_repograph.html', graph)
+
+
+# provide more options for the repo checking
+class fullgraph(TemplateView):
+    def get(self, request):
+        # renders full_graph page
+        return render(request, 'full_graph2.html')

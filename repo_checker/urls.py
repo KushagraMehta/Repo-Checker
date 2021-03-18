@@ -16,8 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.conf.urls import include
+from user import views
 
 urlpatterns = [
-    path('', include('user.urls')),
-    path('admin/', admin.site.urls),
+    path('', views.userpage.as_view(), name='index'),               # move to userpage when user comes to main url
+    path('admin/', admin.site.urls),                                # admin page
+    path('user_graph/<str:username>', views.new_repopage.as_view(), name='new_repopage'),       # dashboard page with username as argument
+    path('fullgraph/', views.fullgraph.as_view(), name='fullgraph'),                            # fullgraph page
+    
 ]
