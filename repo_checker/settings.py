@@ -15,7 +15,7 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 TEMPALTE_DIR = os.path.join(BASE_DIR, 'templates')
 # STATIC_DIR = os.path.join(BASE_DIR, 'static')
 
@@ -27,9 +27,10 @@ TEMPALTE_DIR = os.path.join(BASE_DIR, 'templates')
 SECRET_KEY = '5p=v1!uxf^7rf0@q%pmkln)ncu=e27dmj$qfj^a7ot5h+i!te9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['repo-checker-a.herokuapp.com', '127.0.0.1:8000']
+ALLOWED_HOSTS = ['repo-checker-a.herokuapp.com', '127.0.0.1']
+# ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -123,6 +124,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATICFILES_DIRS = [
-#     STATIC_DIR,
-# ]
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static/'),
+)
